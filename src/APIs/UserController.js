@@ -8,8 +8,6 @@ class UserContoller {
   }
 
   async getUserProfile() {
-  
-
     return this.apiClient
       .post(APIURLs.profile, {}, { "x-access-token": this.user.token })
       .then((response) => {
@@ -34,9 +32,9 @@ class UserContoller {
       });
   }
 
-  votePost(vote) {
-    this.apiClient
-      .post(APIURLs.votePost, vote, { "x-access-token": "" })
+  async votePost(vote) {
+    return this.apiClient
+      .post(APIURLs.votePost, vote, { "x-access-token": this.user.token })
       .then((response) => {
         console.log(response);
         return response.data;
@@ -63,10 +61,12 @@ class UserContoller {
   //File upload pending - not done
   async raiseQuery(query) {
     return this.apiClient
-      .requestForm(APIURLs.raiseQuery,"POST", query, { "x-access-token": this.user.token })
+      .requestForm(APIURLs.raiseQuery, "POST", query, {
+        "x-access-token": this.user.token,
+      })
       .then((response) => {
         console.log(response.code);
-        
+
         return response;
       })
       .catch((error) => {

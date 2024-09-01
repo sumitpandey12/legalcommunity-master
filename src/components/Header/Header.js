@@ -11,6 +11,7 @@ import ButtonWidet from "../../Utils/ButtonWidet";
 import { RiImageAddLine } from "react-icons/ri";
 import { IoMdNotifications } from "react-icons/io";
 import UserContoller from "../../APIs/UserController";
+import { useFilePicker } from "use-file-picker";
 
 const Header = (props) => {
   const [show, setShow] = React.useState(false);
@@ -20,24 +21,50 @@ const Header = (props) => {
 
   const authContext = useContext(AuthContext);
 
-  const queryRef = useRef('');
+  const queryRef = useRef("");
+  const attachImageRef = useRef(null);
 
   const userController = new UserContoller();
 
   const toggleLogin = () => setShow(!show);
   const toggleRaiseQuery = () => setIsRaiseQuery(!isRaiseQuery);
 
+  const [isFile, setFile] = React.useState(false);
 
-  const raiseQuery =  async () =>{
-    if(queryRef.current.value.length < 5) return;
+  const { openFilePicker, filesContent, loading } = useFilePicker({
+    readAs: "DataURL",
+    accept: "image/*",
+  });
+
+  const raiseQuery = async () => {
+    if (queryRef.current.value.length < 5) return;
+
     const query = new FormData();
     query.append("query_content", queryRef.current.value);
+
+    if (isFile !== false) {
+      query.append("file", isFile);
+    }
+
+    console.log(query);
     const response = await userController.raiseQuery(query);
-    if(response.code == 200){
+    if (response.code === 200) {
       setIsRaiseQuery(false);
     }
-  }
+  };
 
+  const handlerFileSelector = () => {
+    openFilePicker();
+    if (!loading && filesContent[0] !== undefined) {
+      setFile(true);
+      console.log(attachImageRef.current);
+    }
+  };
+
+  const handlerFileUpload = (e) => {
+    setFile(e.target.files[0]);
+    console.log(isFile);
+  };
 
   return (
     <header
@@ -81,7 +108,10 @@ const Header = (props) => {
         )}
       </div>
 
-      <NotificationModal show={isNotificationOpen}>
+      <NotificationModal
+        show={isNotificationOpen}
+        onClose={() => setNotificationOpen(false)}
+      >
         <div className="flex flex-col justify-start mt-1 mb-4 h-1/4 overflow-y-auto">
           <div className="flex justify-between items-center border-b py-2">
             <div className="flex flex-col gap-1 justify-start items-start">
@@ -89,7 +119,10 @@ const Header = (props) => {
               <p className="text-sm">LGBTQ Legal Code</p>
               <p className="text-sm">Posted on 10/10/2022</p>
             </div>
-            <div className="text-lg text-blue-500">Accept</div>
+            <div className="flex flex-col gap-2">
+              <div className="text-lg text-blue-500">Accept</div>
+              <div className="text-lg text-red-500">Reject</div>
+            </div>
           </div>
 
           <div className="flex justify-between items-center border-b py-2">
@@ -123,6 +156,7 @@ const Header = (props) => {
               <p className="text-sm">Posted on 10/10/2022</p>
             </div>
             <div className="text-lg text-blue-500">Accept</div>
+            <div className="text-lg text-red-500">Reject</div>
           </div>
         </div>
       </NotificationModal>
@@ -133,13 +167,37 @@ const Header = (props) => {
         onClose={() => toggleRaiseQuery()}
       >
         <h1 className="text-xl font-bold">Raise Query</h1>
-        <textarea ref={queryRef} className="w-full h-full border border-gray-300 h-56 my-2 p-1" placeholder="Write here..." />
+        <textarea
+          ref={queryRef}
+          className="w-full h-full border border-gray-300 h-56 my-2 p-1"
+          placeholder="Write here..."
+        />
+        {isFile !== false && (
+          <img
+            ref={attachImageRef}
+            src={URL.createObjectURL(isFile)}
+            className="w-1/2 h-1/2"
+          />
+        )}
+
         <div className="flex justify-start mt-1 mb-4">
-          <div className="flex gap-1 items-center">
+          <input
+            hidden
+            type="file"
+            id="fileUpload"
+            onChange={handlerFileUpload}
+          />
+          <div
+            onClick={() => {
+              document.getElementById("fileUpload").click();
+            }}
+            className="flex gap-1 items-center cursor-pointer"
+          >
             <RiImageAddLine size={18} color="rgb(67 20 7)" />
             <p className="text-sm text-orange-950">Attach Image</p>
           </div>
         </div>
+
         <Button title="Submit" onClick={raiseQuery} />
       </Modal>
 
@@ -160,11 +218,13 @@ const Header = (props) => {
   );
 };
 
-const NotificationModal = ({ show, children }) => {
+const NotificationModal = ({ show, children, onClose }) => {
   if (!show) return null;
   return (
-    <div className="fixed right-64 top-16 border z-50 bg-white w-1/4 h-2/4 shadow-lg overflow-auto">
-      <div className="px-4 py-4">{children}</div>
+    <div onClick={onClose} className="w-full h-full fixed z-50 right-0 top-16">
+      <div className="fixed z-50 right-16 top-16 border bg-white w-1/4 h-2/4 shadow-lg overflow-auto">
+        <div className="px-4 py-4">{children}</div>
+      </div>
     </div>
   );
 };

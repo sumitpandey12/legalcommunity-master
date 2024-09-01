@@ -1,5 +1,5 @@
 export default class APIURLs {
-  static baseURL = "http://127.0.0.1:4000";
+  static baseURL = "https://lovely-poems-rescue.loca.lt";
   static register = "/auth/register";
   static login = "/auth/login";
 

@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import Card from "../../../Utils/Card";
 import Avatars from "../../../Utils/Avatars";
 import {
-  AiOutlineLike,
-  AiOutlineDislike,
   AiOutlineComment,
   AiFillCaretDown,
   AiFillCaretUp,
@@ -12,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../../Utils/Button";
 import FeedMenu from "./FeedMoreMenu";
 import { Tooltip } from "@mui/material";
+import UserContoller from "../../../APIs/UserController";
 
 const FeedItem = ({
   id,
@@ -28,6 +27,8 @@ const FeedItem = ({
 
   const [isMoreOpen, setMoreOpen] = useState(false);
 
+  const userController = new UserContoller();
+
   const handleClick = () => {
     navigate("/post/" + id);
   };
@@ -36,7 +37,15 @@ const FeedItem = ({
     setMoreOpen(!isMoreOpen);
   };
 
-  const handlerMoreClick = () => {};
+  const voteHandler = async (vote) => {
+    const body = {
+      query_id: id,
+      vote: vote,
+    };
+    setUpVote(true);
+    const response = await userController.votePost(body);
+    console.log(response);
+  };
 
   return (
     <Card className="w-2/3 mt-4">
@@ -76,7 +85,7 @@ const FeedItem = ({
             </div>
             <div className="flex gap-1 items-center">
               <div
-                onClick={() => setUpVote(true)}
+                onClick={() => voteHandler(1)}
                 className={`flex gap-1 cursor-pointer items-center transition hover:text-slate-600 ${
                   isUpVote
                     ? "rounded-full bg-orange-950 px-3 py-1"
@@ -91,7 +100,7 @@ const FeedItem = ({
               <span>{like_count}</span>
               <Tooltip title="DownVote" placement="top">
                 <div
-                  onClick={() => setUpVote(false)}
+                  onClick={() => voteHandler(-1)}
                   className="flex gap-1 items-center transition hover:text-slate-600 cursor-pointer px-2"
                 >
                   <AiFillCaretDown size={20} />
