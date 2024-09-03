@@ -1,14 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import NavigationTab from "./NavigationTab";
-import {
-  RiHomeLine,
-  RiCompassDiscoverFill,
-  RiAccountCircleLine,
-  RiRobot3Fill,
-} from "react-icons/ri";
-import { IoLibrary } from "react-icons/io5";
-import { Link } from "react-router-dom";
 import Divider from "../../Utils/Divider";
+import AuthContext from "../../Context/AuthContext";
+import { PopupContext } from "../../Context/PopupContext";
 
 const navigationItem = [
   {
@@ -33,25 +27,18 @@ const navigationItem = [
   },
 ];
 
-const requestList = [
-  {
-    id: 3,
-    name: "Account",
-  },
-  {
-    id: 4,
-    name: "Library",
-  },
-  {
-    id: 5,
-    name: "Chat Bot",
-  },
-];
-
 const Navigation = (props) => {
   const [isActive, setIsActive] = React.useState(1);
 
+  const authContext = useContext(AuthContext);
+  const popupContext = useContext(PopupContext);
+
   const handleClick = (id) => {
+    if ((id === 3 || id === 6) && !authContext.isLogined) {
+      popupContext.toggleLogin(true);
+      return;
+    }
+
     setIsActive(id);
   };
 

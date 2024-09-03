@@ -7,6 +7,8 @@ export default class APIURLs {
   static library = "/public/libraries";
   static posts = "/public/posts";
   static categories = "/public/categories";
+  static comment = "/public/comments";
+  static getExperts = "/public/experts";
 
   //User routes
   static profile = "/user/profile";
@@ -20,4 +22,19 @@ export default class APIURLs {
   static reportQuery = "/user/report-query";
   static followUnfolow = "/user/follow-unfollow";
   static friends = "/user/friends";
+  static myqueries = "/user/queries";
+  static deleteQuery = "/user/delete-query";
+  static updateProfile = "/user/update-profile";
+
+  //Lawyer routes
+  static submitCase = "/lawyer/submit-case";
+  static getMyCases = "/lawyer/cases";
+  static getRequestConsultation = "/lawyer/consultation-requests";
+  static updateConsultation = "/lawyer/update-consultation";
+
+  //chats
+  static getChats = "/chat/chats";
+  static createChat = "/chat/create";
+  static addMessage = "/chat/message";
+  static getMessages = "/chat/messages";
 }

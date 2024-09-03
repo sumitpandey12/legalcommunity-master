@@ -22,6 +22,11 @@ const SignupForm = (props) => {
     ) {
       alert("Email and Password should be atleast 4 characters long");
     } else {
+      if (passwordRef.current.value !== confirmPasswordRef.current.value) {
+        alert("Passwords do not match");
+        return;
+      }
+
       const response = authContext.register({
         name: nameRef.current.value,
         email: emailRef.current.value,

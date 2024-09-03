@@ -7,9 +7,13 @@ class UserContoller {
     this.user = JSON.parse(localStorage.getItem("user"));
   }
 
-  async getUserProfile() {
+  async getUserProfile(id) {
+    let body = {};
+    if (id !== undefined) {
+      body = { user_id: id };
+    }
     return this.apiClient
-      .post(APIURLs.profile, {}, { "x-access-token": this.user.token })
+      .post(APIURLs.profile, body, { "x-access-token": this.user.token })
       .then((response) => {
         return response.data;
       })
@@ -19,8 +23,8 @@ class UserContoller {
       });
   }
 
-  applyForExpert() {
-    this.apiClient
+  async applyForExpert() {
+    return this.apiClient
       .get(APIURLs.applyExpert, { "x-access-token": this.user.token })
       .then((response) => {
         console.log(response);
@@ -45,9 +49,9 @@ class UserContoller {
       });
   }
 
-  commentPost(comment) {
-    this.apiClient
-      .post(APIURLs.commentPost, comment, { "x-access-token": "" })
+  async commentPost(comment) {
+    return this.apiClient
+      .post(APIURLs.commentPost, comment, { "x-access-token": this.user.token })
       .then((response) => {
         console.log(response);
         return response.data;
@@ -57,8 +61,6 @@ class UserContoller {
         return error;
       });
   }
-
-  //File upload pending - not done
   async raiseQuery(query) {
     return this.apiClient
       .requestForm(APIURLs.raiseQuery, "POST", query, {
@@ -75,9 +77,31 @@ class UserContoller {
       });
   }
 
-  reportUser(report) {
-    this.apiClient
-      .post(APIURLs.reportUser, report, { "x-access-token": "" })
+  async modifyQuery(query) {
+    return this.apiClient
+      .request(APIURLs.modifyQuery, "POST", query, {
+        "x-access-token": this.user.token,
+      })
+      .then((response) => {
+        console.log(response.code);
+        return response;
+      });
+  }
+
+  async deleteQuery(query) {
+    return this.apiClient
+      .request(APIURLs.deleteQuery, "POST", query, {
+        "x-access-token": this.user.token,
+      })
+      .then((response) => {
+        console.log(response.code);
+        return response;
+      });
+  }
+
+  async reportUser(report) {
+    return this.apiClient
+      .post(APIURLs.reportUser, report, { "x-access-token": this.user.token })
       .then((response) => {
         console.log(response);
         return response.data;
@@ -88,9 +112,9 @@ class UserContoller {
       });
   }
 
-  reportQuery(report) {
-    this.apiClient
-      .post(APIURLs.reportQuery, report, { "x-access-token": "" })
+  async reportQuery(report) {
+    return this.apiClient
+      .post(APIURLs.reportQuery, report, { "x-access-token": this.user.token })
       .then((response) => {
         console.log(response);
         return response.data;
@@ -101,9 +125,11 @@ class UserContoller {
       });
   }
 
-  followUnfollow(friend) {
-    this.apiClient
-      .post(APIURLs.followUnfollow, friend, { "x-access-token": "" })
+  async followUnfollow(friend) {
+    return this.apiClient
+      .post(APIURLs.followUnfolow, friend, {
+        "x-access-token": this.user.token,
+      })
       .then((response) => {
         console.log(response);
         return response.data;
@@ -114,9 +140,112 @@ class UserContoller {
       });
   }
 
-  getFriends() {
-    this.apiClient
-      .post(APIURLs.friends, {}, { "x-access-token": "" })
+  async getFriends() {
+    return this.apiClient
+      .post(APIURLs.friends, {}, { "x-access-token": this.user.token })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+  async getMyQuery(id) {
+    let body = {};
+    if (id !== undefined) {
+      body = { user_id: id };
+    }
+
+    return this.apiClient
+      .post(APIURLs.myqueries, body, { "x-access-token": this.user.token })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async postMyCases(cases) {
+    return this.apiClient
+      .post(APIURLs.submitCase, cases, { "x-access-token": this.user.token })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async getMyCases() {
+    return this.apiClient
+      .get(APIURLs.getMyCases, { "x-access-token": this.user.token })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async requestConsultation(cases) {
+    return this.apiClient
+      .post(APIURLs.requestConsultation, cases, {
+        "x-access-token": this.user.token,
+      })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async getRequestConsultation() {
+    return this.apiClient
+      .get(APIURLs.getRequestConsultation, {
+        "x-access-token": this.user.token,
+      })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async updateConsultation(cases) {
+    return this.apiClient
+      .post(APIURLs.updateConsultation, cases, {
+        "x-access-token": this.user.token,
+      })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async updateProfile(user) {
+    return this.apiClient
+      .requestForm(APIURLs.updateProfile, "POST", user, {
+        "x-access-token": this.user.token,
+      })
       .then((response) => {
         console.log(response);
         return response.data;

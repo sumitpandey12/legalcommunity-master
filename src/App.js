@@ -12,26 +12,37 @@ import AuthProvider from "./Context/AuthProvider";
 import Chat from "./components/Chat/Chat";
 import ChatLayout from "./components/Chat/ChatLayout";
 import ChatItem from "./components/Chat/ChatItem";
+import { FeedProvider } from "./Context/FeedContext";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="feeds" element={<Home />} />
-            <Route path="popular" element={<Popular />} />
-            <Route path="account" element={<Account />} />
-            <Route path="library" element={<Library />} />
-            <Route path="chatbot" element={<ChatBot />} />
-            <Route path="post/:id" element={<Post />} />
-            <Route path="chat" element={<ChatLayout />}>
-              <Route index element={<Chat />} />
-              <Route path=":id" element={<ChatItem />} />
+        <FeedProvider>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="feeds" element={<Home />} />
+              <Route path="popular" element={<Popular />} />
+              <Route path="account" element={<Account />} />
+              <Route path="account/:id" element={<Account />} />
+              <Route path="library" element={<Library />} />
+              <Route path="chatbot" element={<ChatBot />} />
+              <Route path="post/:id" element={<Post />} />
+              <Route path="chat" element={<ChatLayout />}>
+                <Route index element={<Chat />} />
+                <Route
+                  path="request/:id"
+                  element={<ChatItem isMessage={false} />}
+                />
+                <Route
+                  path="message/:id"
+                  element={<ChatItem isMessage={true} />}
+                />
+              </Route>
             </Route>
-          </Route>
-        </Routes>
+          </Routes>
+        </FeedProvider>
       </AuthProvider>
     </BrowserRouter>
   );

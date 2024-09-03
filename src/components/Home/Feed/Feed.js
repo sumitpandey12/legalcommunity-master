@@ -1,24 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import FeedItem from "./FeedItem";
-import PublicController from "../../../APIs/PublicController";
+import { FeedContext } from "../../../Context/FeedContext";
+import { Avatar, Card, Chip } from "@mui/material";
+import Spinner from "../../../Utils/Spinner";
 
-const Feed = ({ feeds }) => {
+const Feed = () => {
+  const feedContext = useContext(FeedContext);
+
+  if (feedContext.topPosts === null) {
+    return <Spinner />;
+  }
+
   return (
-    <div className="">
-      {feeds &&
-        feeds.map((feed, index) => (
-          <FeedItem
-            key={index}
-            full_name={feed.name}
-            comment_count={feed.comment_count}
-            date={feed.created_at}
-            description={feed.query_content}
-            image_url={feed.file}
-            id={feed.id}
-            user_profile={feed.profile}
-            like_count={feed.vote_count}
-          />
-        ))}
+    <div className="w-full flex gap-4">
+      <div className="w-full overflow-y-auto">
+        {feedContext.posts &&
+          feedContext.posts.map((feed, index) => (
+            <FeedItem
+              key={index}
+              full_name={feed.name}
+              comment_count={feed.comment_count}
+              date={feed.created_at}
+              description={feed.query_content}
+              image_url={feed.file}
+              id={feed.id}
+              user_profile={feed.profile}
+              like_count={feed.vote_count}
+              auther_id={feed.author_id}
+              is_following={feed.is_following}
+            />
+          ))}
+      </div>
     </div>
   );
 };

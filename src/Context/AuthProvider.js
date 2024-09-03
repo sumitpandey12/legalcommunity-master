@@ -1,58 +1,64 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AuthContext from "./AuthContext";
 import APIURLs from "../APIs/APIUrls";
 import AuthController from "../APIs/AuthController";
+import { useNavigate } from "react-router-dom";
+import UserContoller from "../APIs/UserController";
 
 const AuthProvider = (props) => {
   const authController = new AuthController();
+  const userController = new UserContoller();
+  const [isLogined, setIsLogined] = React.useState(false);
+  const navigate = useNavigate();
+  const [user, setUser] = React.useState(null);
 
-  const [user, setUser] = React.useState(
-    localStorage.getItem("user")
-      ? JSON.parse(localStorage.getItem("user"))
-      : null
-  );
+  useEffect(() => {
+    if (localStorage.getItem("user") !== null) {
+      console.log("set user");
+      setUser(JSON.parse(localStorage.getItem("user")));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user !== null) {
+      setIsLogined(true);
+    } else {
+      setIsLogined(false);
+    }
+  }, [user]);
 
   const login = async (user) => {
     const response = await authController.login(user);
     if (response !== false) {
-      console.log(response);
       setUser(response);
       localStorage.setItem("user", JSON.stringify(response));
+      localStorage.setItem("token", response.token);
       return true;
     }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.setItem("user", null);
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
+  const getProfile = async () => {
+    console.log("Getting profile...");
+    const response = await userController.getUserProfile();
+    if (response) {
+      console.log("setting responses", response);
+      setUser(response);
+      localStorage.setItem("user", JSON.stringify(response));
+    }
   };
 
   const registerHandler = async (user) => {
     try {
-      // const response = await fetch(APIURLs.baseURL + "/auth/register", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(user),
-      // });
-      // if (!response.ok) {
-      //   throw new Error(`HTTP error! status: ${response.status}`);
-      // }
-      // const data = await response.json();
-      // console.log(data);
-      // if (data.code === 300) {
-      //   alert(data.message);
-      //   return;
-      // }
-      // if (data.code === 200) {
-      //   login(data.data);
-      //   return true;
-      // }
-
       const response = await authController.register(user);
       if (response) {
-        login(response);
+        login(user);
+        console.log("Signup response", response);
         return true;
       } else {
         return false;
@@ -62,11 +68,25 @@ const AuthProvider = (props) => {
     }
   };
 
+  const updateProfileHandler = async (user) => {
+    console.log("user", user);
+    const response = await userController.updateProfile(user);
+    if (response) {
+      return true;
+    }
+    getProfile();
+  };
+
   const initData = {
     user: user,
     login: login,
     logout: logout,
     register: registerHandler,
+    updateProfile: updateProfileHandler,
+    isLawyer: () => {
+      return user.user_type === "Lawyer";
+    },
+    isLogined: isLogined,
   };
 
   return (

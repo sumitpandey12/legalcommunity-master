@@ -12,12 +12,13 @@ import { RiImageAddLine } from "react-icons/ri";
 import { IoMdNotifications } from "react-icons/io";
 import UserContoller from "../../APIs/UserController";
 import { useFilePicker } from "use-file-picker";
+import { ChatContext } from "../../Context/ChatContext";
+import { PopupContext } from "../../Context/PopupContext";
 
 const Header = (props) => {
-  const [show, setShow] = React.useState(false);
   const [isLogin, setIsLogin] = React.useState(false);
   const [isRaiseQuery, setIsRaiseQuery] = React.useState(false);
-  const [isNotificationOpen, setNotificationOpen] = React.useState(false);
+  const popupContext = useContext(PopupContext);
 
   const authContext = useContext(AuthContext);
 
@@ -26,7 +27,6 @@ const Header = (props) => {
 
   const userController = new UserContoller();
 
-  const toggleLogin = () => setShow(!show);
   const toggleRaiseQuery = () => setIsRaiseQuery(!isRaiseQuery);
 
   const [isFile, setFile] = React.useState(false);
@@ -66,6 +66,10 @@ const Header = (props) => {
     console.log(isFile);
   };
 
+  //Notifications
+  const [isNotificationOpen, setNotificationOpen] = React.useState(false);
+  const chatContext = useContext(ChatContext);
+
   return (
     <header
       className={`sticky top-0 flex bg-white justify-between items-center p-4 border-b h-16 ${props.className}`}
@@ -75,7 +79,7 @@ const Header = (props) => {
         className="h-6"
       />
       {authContext.user && authContext.user.name && (
-        <p>{authContext.user.name}</p>
+        <p className="font-bold">Hi, {authContext.user.name}</p>
       )}
       <SearchBox />
       <div className="flex gap-4 items-center">
@@ -96,7 +100,10 @@ const Header = (props) => {
         )}
 
         {authContext.user === null && (
-          <Button title="Sign In" onClick={() => toggleLogin()} />
+          <Button
+            title="Sign In"
+            onClick={() => popupContext.toggleLogin(true)}
+          />
         )}
 
         {authContext.user !== null && (
@@ -113,51 +120,24 @@ const Header = (props) => {
         onClose={() => setNotificationOpen(false)}
       >
         <div className="flex flex-col justify-start mt-1 mb-4 h-1/4 overflow-y-auto">
-          <div className="flex justify-between items-center border-b py-2">
-            <div className="flex flex-col gap-1 justify-start items-start">
-              <p className="text-lg font-bold">Sumit Pandey</p>
-              <p className="text-sm">LGBTQ Legal Code</p>
-              <p className="text-sm">Posted on 10/10/2022</p>
+          {chatContext.requestNotifications.length > 0 ? (
+            chatContext.requestNotifications.map((notification, index) => {
+              if (notification.status != "Pending") return;
+              return (
+                <NotificationItem
+                  key={index}
+                  title={notification.name}
+                  message={notification.title}
+                  onAccept={() => chatContext.acceptRequest(notification.id)}
+                  onReject={() => chatContext.rejectRequest(notification.id)}
+                />
+              );
+            })
+          ) : (
+            <div className="flex justify-center items-center h-full">
+              <p>No Notifications</p>
             </div>
-            <div className="flex flex-col gap-2">
-              <div className="text-lg text-blue-500">Accept</div>
-              <div className="text-lg text-red-500">Reject</div>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center border-b py-2">
-            <div className="flex flex-col gap-1 justify-start items-start">
-              <p className="text-lg font-bold">Sumit Pandey</p>
-              <p className="text-sm">LGBTQ Legal Code</p>
-              <p className="text-sm">Posted on 10/10/2022</p>
-            </div>
-            <div className="text-lg text-blue-500">Accept</div>
-          </div>
-          <div className="flex justify-between items-center border-b py-2">
-            <div className="flex flex-col gap-1 justify-start items-start">
-              <p className="text-lg font-bold">Sumit Pandey</p>
-              <p className="text-sm">LGBTQ Legal Code</p>
-              <p className="text-sm">Posted on 10/10/2022</p>
-            </div>
-            <div className="text-lg text-blue-500">Accept</div>
-          </div>
-          <div className="flex justify-between items-center border-b py-2">
-            <div className="flex flex-col gap-1 justify-start items-start">
-              <p className="text-lg font-bold">Sumit Pandey</p>
-              <p className="text-sm">LGBTQ Legal Code</p>
-              <p className="text-sm">Posted on 10/10/2022</p>
-            </div>
-            <div className="text-lg text-blue-500">Accept</div>
-          </div>
-          <div className="flex justify-between items-center border-b py-2">
-            <div className="flex flex-col gap-1 justify-start items-start">
-              <p className="text-lg font-bold">Sumit Pandey</p>
-              <p className="text-sm">LGBTQ Legal Code</p>
-              <p className="text-sm">Posted on 10/10/2022</p>
-            </div>
-            <div className="text-lg text-blue-500">Accept</div>
-            <div className="text-lg text-red-500">Reject</div>
-          </div>
+          )}
         </div>
       </NotificationModal>
 
@@ -201,15 +181,18 @@ const Header = (props) => {
         <Button title="Submit" onClick={raiseQuery} />
       </Modal>
 
-      <Modal show={show} onClose={() => toggleLogin()}>
+      <Modal
+        show={popupContext.loginShow}
+        onClose={() => popupContext.toggleLogin(false)}
+      >
         {isLogin ? (
           <LoginForm
-            onClose={() => toggleLogin()}
+            onClose={() => popupContext.toggleLogin(false)}
             onSignUp={() => setIsLogin(false)}
           />
         ) : (
           <SignupForm
-            onClose={() => toggleLogin()}
+            onClose={() => popupContext.toggleLogin(false)}
             onSignUp={() => setIsLogin(true)}
           />
         )}
@@ -224,6 +207,37 @@ const NotificationModal = ({ show, children, onClose }) => {
     <div onClick={onClose} className="w-full h-full fixed z-50 right-0 top-16">
       <div className="fixed z-50 right-16 top-16 border bg-white w-1/4 h-2/4 shadow-lg overflow-auto">
         <div className="px-4 py-4">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+const NotificationItem = ({ title, message, onAccept, onReject }) => {
+  return (
+    <div className="flex justify-between items-center border-b py-2">
+      <div className="flex flex-col gap-1 justify-start items-start">
+        <p className="text-lg font-bold">{title}</p>
+        <p className="text-sm">{message}</p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onAccept();
+          }}
+          className="text-lg text-blue-500 cursor-pointer"
+        >
+          Accept
+        </div>
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onReject();
+          }}
+          className="text-lg text-red-500 cursor-pointer"
+        >
+          Reject
+        </div>
       </div>
     </div>
   );

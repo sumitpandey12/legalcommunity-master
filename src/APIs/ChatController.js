@@ -1,17 +1,16 @@
 import ApiClient from "./APIClient";
 import APIURLs from "./APIUrls";
 
-class PublicController {
+class ChatController {
   constructor() {
     this.apiClient = new ApiClient(APIURLs.baseURL);
     this.user = JSON.parse(localStorage.getItem("user"));
   }
 
-  async getPosts() {
-    console.log(APIURLs.posts);
+  async getChats() {
     return this.apiClient
-      .post(APIURLs.posts, {
-        search: "",
+      .get(APIURLs.getChats, {
+        "x-access-token": this.user.token,
       })
       .then((response) => {
         console.log(response);
@@ -23,12 +22,10 @@ class PublicController {
       });
   }
 
-  async getLibrary(search, type, category_id) {
+  async createChat(cases) {
     return this.apiClient
-      .post(APIURLs.library, {
-        search: search,
-        type: type,
-        category_id: category_id,
+      .post(APIURLs.createChat, cases, {
+        "x-access-token": this.user.token,
       })
       .then((response) => {
         console.log(response);
@@ -39,24 +36,10 @@ class PublicController {
         return error;
       });
   }
-
-  async getCategories() {
+  async addMessage(cases) {
     return this.apiClient
-      .get(APIURLs.categories)
-      .then((response) => {
-        console.log(response);
-        return response.data;
-      })
-      .catch((error) => {
-        console.log(error);
-        return error;
-      });
-  }
-
-  async getComments(post_id) {
-    return this.apiClient
-      .post(APIURLs.comment, {
-        query_id: post_id,
+      .post(APIURLs.addMessage, cases, {
+        "x-access-token": this.user.token,
       })
       .then((response) => {
         console.log(response);
@@ -67,17 +50,10 @@ class PublicController {
         return error;
       });
   }
-
-  async getExperts(search) {
-    let body = {
-      search: "",
-    };
-    if (search !== undefined) {
-      body.search = search;
-    }
+  async getMessages(cases) {
     return this.apiClient
-      .post(APIURLs.getExperts, {
-        search: "",
+      .post(APIURLs.getMessages, cases, {
+        "x-access-token": this.user.token,
       })
       .then((response) => {
         console.log(response);
@@ -90,4 +66,4 @@ class PublicController {
   }
 }
 
-export default PublicController;
+export default ChatController;

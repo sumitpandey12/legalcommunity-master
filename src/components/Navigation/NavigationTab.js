@@ -14,7 +14,7 @@ import AuthContext from "../../Context/AuthContext";
 const NavigationTab = ({ id, name, isActive, onClick }) => {
   const authContext = useContext(AuthContext);
 
-  if (authContext.user === null && id === 3) return null;
+  if (authContext.user === null && (id === 3 || id === 6)) return null;
 
   return (
     <Link

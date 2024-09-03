@@ -1,130 +1,83 @@
 import { Avatar, IconButton } from "@mui/material";
 import { blue, deepOrange } from "@mui/material/colors";
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 import NewInput from "../../Utils/NewInput";
 import { BiArrowBack } from "react-icons/bi";
+import { ChatContext } from "../../Context/ChatContext";
+import ChatController from "../../APIs/ChatController";
+import AuthContext from "../../Context/AuthContext";
+import Spinner from "../../Utils/Spinner";
 
-const chatHistory = [
-  {
-    role: "user",
-    message: "Hey",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-];
-
-const ChatItem = () => {
+const ChatItem = ({ isMessage }) => {
   const [isAccepted, setIsAccepted] = React.useState(true);
+  const [chat, setChat] = React.useState({});
+  const [chatHistory, setChatHistory] = React.useState(null);
+  const chatContext = React.useContext(ChatContext);
+  const params = useParams();
+
+  const chatController = new ChatController();
+  const authContext = React.useContext(AuthContext);
+
+  useEffect(() => {
+    loadChats();
+  }, []);
+
+  useEffect(() => {
+    loadChatHistory();
+  }, []);
+
+  const loadChats = async () => {
+    if (isMessage) {
+      await setChat(chatContext.getMessagesChat(params.id));
+    } else {
+      await setChat(chatContext.getRequestsChat(params.id));
+    }
+  };
+
+  const loadChatHistory = async () => {
+    const res = await chatController.getMessages({
+      chat_id: params.id,
+    });
+    setChatHistory(res);
+  };
+
+  const sendMessage = async (message) => {
+    const res = await chatController.addMessage({
+      chat_id: params.id,
+      message_type: "Text",
+      message: message,
+    });
+    loadChatHistory();
+  };
 
   return (
     <div className="relative w-full h-full flex flex-col">
-      <ChatListTile />
+      <ChatListTile isMessage={true} {...chat.user} />
       {isAccepted ? (
         <>
           <div className="flex-1 p-4 overflow-y-auto">
-            {chatHistory.map((chat, index) => (
-              <Chat
-                key={index}
-                user={chat.role === "user"}
-                message={chat.message}
-              />
-            ))}
+            {chatHistory !== null && chatHistory.length > 0 ? (
+              chatHistory.map((chat, index) => (
+                <Chat
+                  key={index}
+                  user={chat.sender_id === authContext.user.id}
+                  message={chat.message}
+                />
+              ))
+            ) : chatHistory !== null ? (
+              <div>No messages</div>
+            ) : (
+              <Spinner />
+            )}
           </div>
 
-          <div className="w-full bg-white z-20 flex justify-center sticky bottom-0">
-            <NewInput placeholder="Type here..." className="w-2/3 my-3" />
+          <div className="w-full bg-white fixed bottom-0 left-32 inset-x-0 flex justify-center">
+            <NewInput
+              onSend={sendMessage}
+              placeholder="Type here..."
+              className="w-2/3 my-3"
+            />
           </div>
         </>
       ) : (
@@ -136,7 +89,7 @@ const ChatItem = () => {
   );
 };
 
-const ChatListTile = ({ one }) => {
+const ChatListTile = ({ isMessage, name, profile, id }) => {
   return (
     <div className="sticky top-0 bg-white z-20 flex gap-4 items-center w-full px-4 py-2 border-b border-gray-300">
       <IconButton
@@ -147,8 +100,10 @@ const ChatListTile = ({ one }) => {
       >
         <BiArrowBack />
       </IconButton>
-      <Avatar sx={{ bgcolor: one ? deepOrange[500] : blue[500] }}>S</Avatar>
-      <p className="text-md font-semibold">Sumit Pandey</p>
+      <Avatar sx={{ bgcolor: isMessage ? deepOrange[500] : blue[500] }}>
+        {name && name[0].toUpperCase()}
+      </Avatar>
+      <p className="text-md font-semibold">{name}</p>
     </div>
   );
 };
@@ -158,7 +113,7 @@ const Chat = ({ user, message }) => {
     <div
       className={`flex ${
         user ? "flex-row-reverse" : "flex-row"
-      } w-full items-end gap-1`}
+      } w-full items-end gap-1 my-1`}
     >
       <Avatar
         image={
