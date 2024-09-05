@@ -40,8 +40,8 @@ const ChatProvider = (props) => {
 
   async function getChats() {
     const res = await chatController.getChats();
-    setRequestsChat(res.requests);
-    setMessagesChat(res.messages);
+    setRequestsChat(res?.requests);
+    setMessagesChat(res?.messages);
     console.log(res);
   }
 
@@ -54,7 +54,7 @@ const ChatProvider = (props) => {
   }
 
   function filterAcceptedNotifications() {
-    const acceptedNotifications = requestNotifications.filter(
+    const acceptedNotifications = requestNotifications?.filter(
       (not) => not.status === "Accepted"
     );
     setAcceptedNotifications(acceptedNotifications);

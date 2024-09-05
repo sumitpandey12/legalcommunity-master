@@ -2,10 +2,14 @@ import React from "react";
 import TopFeed from "./TopFeed/TopFeed";
 import Feed from "./Feed/Feed";
 import ExpertPage from "./ExpertPage";
+import Utils from "../../Utils/Utils";
 
 const Home = (props) => {
   return (
-    <div className={`p-4 bg-white ${props.className}`}>
+    <div
+      style={{ backgroundColor: Utils.color.primary }}
+      className={`p-4 bg-slate-900	 ${props.className}`}
+    >
       <TopFeed />
       <div className="w-full flex gap-4">
         <div className="w-3/4">

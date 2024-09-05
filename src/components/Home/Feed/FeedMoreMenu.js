@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -7,13 +7,7 @@ import Modal from "../../../Utils/Modal";
 import { FeedContext } from "../../../Context/FeedContext";
 import UserContoller from "../../../APIs/UserController";
 import AuthContext from "../../../Context/AuthContext";
-
-const menuItems = [
-  {
-    id: 1,
-    name: "Report Query",
-  },
-];
+import { PopupContext } from "../../../Context/PopupContext";
 
 export default function FeedMenu(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -27,6 +21,7 @@ export default function FeedMenu(props) {
   const reportRef = React.useRef();
   const userController = new UserContoller();
   const authContext = React.useContext(AuthContext);
+  const popupContext = React.useContext(PopupContext);
 
   const reportPostHandler = async (message) => {
     const response = await userController.reportQuery({
@@ -56,12 +51,19 @@ export default function FeedMenu(props) {
     handleClose();
   };
 
+  const [isModifyLoading, setModifyLoading] = React.useState(false);
+
   const modifyHandler = async (query) => {
+    if (isModifyLoading) {
+      return;
+    }
+    setModifyLoading(true);
     const response = await feedContext.modifyPost(props.id, query);
     console.log(response);
     if (response) {
       setEditShow(false);
     }
+    setModifyLoading(false);
   };
 
   const deleteHandler = async () => {
@@ -105,7 +107,7 @@ export default function FeedMenu(props) {
       {/* Report Modal */}
 
       <Modal show={showReport} onClose={() => setShowReport(false)}>
-        <h1 className="text-xl font-bold">Report Message</h1>
+        <h1 className="text-xl font-bold text-white">Report Message</h1>
         <textarea
           ref={reportRef}
           className="w-full h-full border border-gray-300 h-56 my-2 p-1"
@@ -137,7 +139,15 @@ export default function FeedMenu(props) {
           horizontal: "left",
         }}
       >
-        <MenuItem onClick={() => handleMenu({ id: 1 })}>
+        <MenuItem
+          onClick={() => {
+            if (!authContext.isLogined) {
+              popupContext.toggleLogin(true);
+              return;
+            }
+            handleMenu({ id: 1 });
+          }}
+        >
           <div>Report Query</div>
         </MenuItem>
         {authContext.user && authContext.user.id === props.author_id && (

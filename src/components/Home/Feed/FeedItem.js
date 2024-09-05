@@ -13,6 +13,7 @@ import { FeedContext } from "../../../Context/FeedContext";
 import UserContoller from "../../../APIs/UserController";
 import AuthContext from "../../../Context/AuthContext";
 import { PopupContext } from "../../../Context/PopupContext";
+import Utils from "../../../Utils/Utils";
 
 const FeedItem = ({
   id,
@@ -25,12 +26,14 @@ const FeedItem = ({
   description,
   image_url,
   is_following,
+  hideFollow,
 }) => {
   const navigate = useNavigate();
   const [isUpVote, setUpVote] = React.useState(null);
 
   const [isMoreOpen, setMoreOpen] = useState(false);
   const authContext = useContext(AuthContext);
+  const [isFollowLoading, setFollowLoading] = React.useState(false);
 
   const feedContext = useContext(FeedContext);
   const userController = new UserContoller();
@@ -56,9 +59,14 @@ const FeedItem = ({
 
   const followHandler = async () => {
     console.log("Following...", auther_id);
+    if (isFollowLoading) {
+      return;
+    }
+    setFollowLoading(true);
     const response = await userController.followUnfollow({
       friend_id: auther_id,
     });
+    setFollowLoading(false);
     feedContext.refresh();
   };
 
@@ -69,7 +77,7 @@ const FeedItem = ({
 
   return (
     <Card className="w-full mt-4">
-      <div className="flex w-full items-center justify-between border-b pb-3">
+      <div className="flex w-full items-center justify-between border-b border-gray-500 pb-3">
         <div
           onClick={() => {
             if (!authContext.isLogined) {
@@ -83,37 +91,39 @@ const FeedItem = ({
           <div
             className={`h-8 w-8 rounded-full bg-slate-400 bg-[url(${user_profile})]`}
           ></div>
-          <div className="text-lg font-bold text-slate-700">{full_name}</div>
+          <div className="text-lg font-bold text-white">{full_name}</div>
         </div>
         <div className="flex items-center">
-          <Button
-            onClick={() => {
-              if (!authContext.isLogined) {
-                popupContext.toggleLogin(true);
-                return;
-              }
-              followHandler();
-            }}
-            title={is_following === 0 ? "Follow" : "Unfollow"}
-            className={`w-min h-min px-4 py-1 ${
-              is_following !== 0 && "bg-gray-300"
-            }`}
-          />
+          {!hideFollow && (
+            <Button
+              onClick={() => {
+                if (!authContext.isLogined && is_following === 0) {
+                  popupContext.toggleLogin(true);
+                  return;
+                }
+                followHandler();
+              }}
+              isLoading={isFollowLoading}
+              title={is_following === 0 ? "Follow" : "Unfollow"}
+              className={`w-min h-min px-4 py-1 ${
+                is_following !== 0 && "bg-gray-300"
+              }`}
+            />
+          )}
           <FeedMenu id={id} content={description} author_id={auther_id} />
         </div>
       </div>
 
       <p
         onClick={handleClick}
-        className="text-lg my-4 text-start cursor-pointer"
-      >
-        {description}
-      </p>
+        className="text-lg text-white my-4 text-start cursor-pointer line-clamp-6"
+        dangerouslySetInnerHTML={{ __html: description }}
+      ></p>
       {image_url && (
         <img
           src={image_url}
           className="h-80 w-full rounded-xl object-cover"
-          style={{ objectFit: "fill" }}
+          style={{ objectFit: "cover" }}
         />
       )}
 
@@ -146,18 +156,17 @@ const FeedItem = ({
                   }
                   voteHandler(1);
                 }}
-                className={`flex gap-1 cursor-pointer items-center transition hover:text-slate-600 ${
-                  isUpVote
-                    ? "rounded-full bg-orange-950 px-3 py-1"
-                    : "rounded-full bg-orange-100 px-3 py-1"
-                }`}
+                style={{
+                  backgroundColor: isUpVote
+                    ? Utils.color.tertiary
+                    : Utils.color.primary,
+                }}
+                className={`flex gap-1 cursor-pointer items-center transition hover:text-slate-600 rounded-full px-3 py-1 border border-gray-700`}
               >
                 <AiFillCaretUp size={20} className={isUpVote && "text-white"} />
-                <span className={isUpVote ? `text-white` : "text-black"}>
-                  UpVote
-                </span>
+                <span className="text-white">UpVote</span>
               </div>
-              <span>{like_count}</span>
+              <span className="text-white">{like_count}</span>
               <Tooltip title="DownVote" placement="top">
                 <div
                   onClick={() => {

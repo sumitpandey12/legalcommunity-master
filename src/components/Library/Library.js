@@ -4,15 +4,11 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import LibraryItem from "../../Utils/LibraryPostCard";
 import PublicController from "../../APIs/PublicController";
-import Fab from "@mui/material/Fab";
-import { TbNavigationDiscount } from "react-icons/tb";
-import Card from "../../Utils/Card";
-import NewInput from "../../Utils/NewInput";
-import Button from "../../Utils/Button";
 import UserContoller from "../../APIs/UserController";
-import Modal from "../../Utils/Modal";
 import AddLibrary from "./AddLibrary";
 import Spinner from "../../Utils/Spinner";
+import Utils from "../../Utils/Utils";
+import ExpertPage from "../Home/ExpertPage";
 
 const Library = () => {
   const [selectedCategory, setSelectedCategory] = React.useState(-1);
@@ -22,7 +18,6 @@ const Library = () => {
   const [categories, setCategories] = useState(null);
 
   const publicController = new PublicController();
-  const userController = new UserContoller();
 
   useEffect(() => {
     getCategories();
@@ -51,44 +46,49 @@ const Library = () => {
     setSelectedCategory(id);
   };
 
-  //Post
-  const titleRef = useRef("");
-  const descriptionRef = useRef("");
-
   if (categories === null || libraries === null) return <Spinner />;
 
   return (
-    <div className="px-4 pt-4 relative w-full h-full">
-      <TabMenu selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
-      <div className="flex gap-4 overflow-x-auto my-4">
-        {categories.map((category) => (
-          <Chip
-            key={category.id}
-            selected={category.id === selectedCategory}
-            onClick={() => handleClick(category.id)}
-          >
-            {category.category}
-          </Chip>
-        ))}
+    <div className="flex">
+      <div className="px-4 pt-4 relative w-3/4 h-full">
+        <TabMenu selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+        <div className="flex gap-4 overflow-x-auto my-4">
+          {categories &&
+            categories.map &&
+            categories.map((category) => (
+              <Chip
+                key={category.id}
+                selected={category.id === selectedCategory}
+                onClick={() => handleClick(category.id)}
+              >
+                {category.category}
+              </Chip>
+            ))}
+        </div>
+
+        {categories && categories.length > 0 && (
+          <AddLibrary category={categories} />
+        )}
+
+        <div>
+          {libraries &&
+            libraries.map &&
+            libraries.map((item) => (
+              <LibraryItem
+                key={item.id}
+                id={item.id}
+                category={item.category}
+                date={item.created_at}
+                userName={item.name}
+                profileURL={item.profile}
+                title={item.title}
+                description={item.data}
+              />
+            ))}
+        </div>
       </div>
-
-      {categories && categories.length > 0 && (
-        <AddLibrary category={categories} />
-      )}
-
-      <div>
-        {libraries &&
-          libraries.map((item) => (
-            <LibraryItem
-              key={item.id}
-              category={item.category}
-              date={item.created_at}
-              userName={item.name}
-              profileURL={item.profile}
-              title={item.title}
-              description={item.data}
-            />
-          ))}
+      <div style={{ marginTop: "15vh" }} className="1/4">
+        <ExpertPage />
       </div>
     </div>
   );
@@ -97,9 +97,10 @@ const Library = () => {
 const Chip = ({ children, selected, className, onClick }) => {
   return (
     <div
+      style={{ backgroundColor: selected ? Utils.color.secondary : "" }}
       onClick={onClick}
       className={` rounded-full px-4 py-1 cursor-pointer ${
-        selected ? "bg-orange-950 text-white" : "bg-orange-100 text-black"
+        selected ? "text-white" : "bg-white text-black"
       } ${className}`}
     >
       {children}
@@ -119,10 +120,32 @@ const TabMenu = ({ selectedTab, setSelectedTab }) => {
         value={selectedTab}
         onChange={handleChange}
         aria-label="secondary tabs example"
-        indicatorColor="secondary"
+        TabIndicatorProps={{
+          sx: {
+            backgroundColor: Utils.color.secondary,
+          },
+        }}
       >
-        <Tab value={0} label="Previous Cases" />
-        <Tab value={1} label="Rules/Regulations" />
+        <Tab
+          sx={{
+            color: Utils.color.white,
+            "&.Mui-selected": {
+              color: Utils.color.secondary,
+            },
+          }}
+          value={0}
+          label="Previous Cases"
+        />
+        <Tab
+          sx={{
+            color: Utils.color.white,
+            "&.Mui-selected": {
+              color: Utils.color.secondary,
+            },
+          }}
+          value={1}
+          label="Laws/Rules"
+        />
       </Tabs>
     </Box>
   );

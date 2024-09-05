@@ -1,13 +1,18 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-const TopFeedItem = ({ imageURL, title, desc }) => {
+const TopFeedItem = ({ id, imageURL, title, desc }) => {
   return (
-    <div className="relative w-72 h-54 flex-shrink-0 rounded-lg">
+    <Link
+      to={`post/${id}`}
+      className="relative w-72 h-54 flex-shrink-0 rounded-lg"
+    >
       <img
         className="w-full h-full object-cover rounded-lg"
         src={
-          imageURL == null || imageURL=="" ?
-          "https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png":imageURL
+          imageURL == null || imageURL == ""
+            ? "https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
+            : imageURL
         }
         alt={title}
       />
@@ -15,7 +20,7 @@ const TopFeedItem = ({ imageURL, title, desc }) => {
         <span className="text-white text-lg font-bold">{title}</span>
         <span className="text-white text-sm">{desc}</span>
       </div>
-    </div>
+    </Link>
   );
 };
 

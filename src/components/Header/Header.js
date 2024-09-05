@@ -9,11 +9,13 @@ import { MdPostAdd } from "react-icons/md";
 import AuthContext from "../../Context/AuthContext";
 import ButtonWidet from "../../Utils/ButtonWidet";
 import { RiImageAddLine } from "react-icons/ri";
-import { IoMdNotifications } from "react-icons/io";
+import { LuMessagesSquare } from "react-icons/lu";
 import UserContoller from "../../APIs/UserController";
 import { useFilePicker } from "use-file-picker";
 import { ChatContext } from "../../Context/ChatContext";
 import { PopupContext } from "../../Context/PopupContext";
+import Utils from "../../Utils/Utils";
+import logo from "../../logo.png";
 
 const Header = (props) => {
   const [isLogin, setIsLogin] = React.useState(false);
@@ -28,6 +30,7 @@ const Header = (props) => {
   const userController = new UserContoller();
 
   const toggleRaiseQuery = () => setIsRaiseQuery(!isRaiseQuery);
+  const [isLegalLoading, setLegalLoading] = React.useState(false);
 
   const [isFile, setFile] = React.useState(false);
 
@@ -37,6 +40,10 @@ const Header = (props) => {
   });
 
   const raiseQuery = async () => {
+    if (isLegalLoading) {
+      return;
+    }
+    setLegalLoading(true);
     if (queryRef.current.value.length < 5) return;
 
     const query = new FormData();
@@ -51,6 +58,7 @@ const Header = (props) => {
     if (response.code === 200) {
       setIsRaiseQuery(false);
     }
+    setLegalLoading(false);
   };
 
   const handlerFileSelector = () => {
@@ -72,14 +80,12 @@ const Header = (props) => {
 
   return (
     <header
-      className={`sticky top-0 flex bg-white justify-between items-center p-4 border-b h-16 ${props.className}`}
+      style={{ backgroundColor: Utils.color.secondary }}
+      className={`sticky top-0 flex justify-between items-center p-4 h-16 ${props.className}`}
     >
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
-        className="h-6"
-      />
+      <img src={logo} className="h-14 w-14" />
       {authContext.user && authContext.user.name && (
-        <p className="font-bold">Hi, {authContext.user.name}</p>
+        <p className="font-bold text-white">Hi, {authContext.user.name}</p>
       )}
       <SearchBox />
       <div className="flex gap-4 items-center">
@@ -87,7 +93,7 @@ const Header = (props) => {
           onClick={() => setNotificationOpen(!isNotificationOpen)}
           className="relative cursor-pointer"
         >
-          <IoMdNotifications size={28} />
+          <LuMessagesSquare color={Utils.color.primary} size={28} />
           <div className="w-2 h-2 bg-red-500 rounded-full absolute -top-1 right-1"></div>
         </div>
         {authContext.user !== null && (
@@ -120,7 +126,8 @@ const Header = (props) => {
         onClose={() => setNotificationOpen(false)}
       >
         <div className="flex flex-col justify-start mt-1 mb-4 h-1/4 overflow-y-auto">
-          {chatContext.requestNotifications.length > 0 ? (
+          {chatContext.requestNotifications &&
+          chatContext.requestNotifications.length > 0 ? (
             chatContext.requestNotifications.map((notification, index) => {
               if (notification.status != "Pending") return;
               return (
@@ -135,7 +142,7 @@ const Header = (props) => {
             })
           ) : (
             <div className="flex justify-center items-center h-full">
-              <p>No Notifications</p>
+              <p>No Request!</p>
             </div>
           )}
         </div>
@@ -146,7 +153,7 @@ const Header = (props) => {
         show={isRaiseQuery}
         onClose={() => toggleRaiseQuery()}
       >
-        <h1 className="text-xl font-bold">Raise Query</h1>
+        <h1 className="text-xl font-bold text-white">Raise Query</h1>
         <textarea
           ref={queryRef}
           className="w-full h-full border border-gray-300 h-56 my-2 p-1"
@@ -173,12 +180,16 @@ const Header = (props) => {
             }}
             className="flex gap-1 items-center cursor-pointer"
           >
-            <RiImageAddLine size={18} color="rgb(67 20 7)" />
-            <p className="text-sm text-orange-950">Attach Image</p>
+            <RiImageAddLine size={18} color="#fff" />
+            <p className="text-sm text-white">Attach Image</p>
           </div>
         </div>
 
-        <Button title="Submit" onClick={raiseQuery} />
+        <Button
+          isLoading={isLegalLoading}
+          title="Submit"
+          onClick={raiseQuery}
+        />
       </Modal>
 
       <Modal
@@ -205,7 +216,7 @@ const NotificationModal = ({ show, children, onClose }) => {
   if (!show) return null;
   return (
     <div onClick={onClose} className="w-full h-full fixed z-50 right-0 top-16">
-      <div className="fixed z-50 right-16 top-16 border bg-white w-1/4 h-2/4 shadow-lg overflow-auto">
+      <div className="fixed z-50 right-16 top-16 border border-gray-500 bg-white w-1/4 h-2/4 shadow-lg overflow-auto">
         <div className="px-4 py-4">{children}</div>
       </div>
     </div>
@@ -214,7 +225,7 @@ const NotificationModal = ({ show, children, onClose }) => {
 
 const NotificationItem = ({ title, message, onAccept, onReject }) => {
   return (
-    <div className="flex justify-between items-center border-b py-2">
+    <div className="flex justify-between items-center border-b border-gray-500 py-2">
       <div className="flex flex-col gap-1 justify-start items-start">
         <p className="text-lg font-bold">{title}</p>
         <p className="text-sm">{message}</p>

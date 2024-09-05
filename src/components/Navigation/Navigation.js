@@ -3,15 +3,12 @@ import NavigationTab from "./NavigationTab";
 import Divider from "../../Utils/Divider";
 import AuthContext from "../../Context/AuthContext";
 import { PopupContext } from "../../Context/PopupContext";
+import Utils from "../../Utils/Utils";
 
 const navigationItem = [
   {
     id: 1,
     name: "Home",
-  },
-  {
-    id: 2,
-    name: "Popular",
   },
   {
     id: 3,
@@ -43,7 +40,10 @@ const Navigation = (props) => {
   };
 
   return (
-    <div className={`border p-4  ${props.className}`}>
+    <div
+      style={{ backgroundColor: Utils.color.primary }}
+      className={`border-r border-gray-500 p-4 bg-slate-900 ${props.className}`}
+    >
       <div className="items-center">
         {navigationItem.map((item) => (
           <NavigationTab

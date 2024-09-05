@@ -12,8 +12,15 @@ class UserContoller {
     if (id !== undefined) {
       body = { user_id: id };
     }
+
+    let header;
+    if (this.user !== null) {
+      header = {
+        "x-access-token": this.user.token,
+      };
+    }
     return this.apiClient
-      .post(APIURLs.profile, body, { "x-access-token": this.user.token })
+      .post(APIURLs.profile, body, header)
       .then((response) => {
         return response.data;
       })
@@ -158,8 +165,15 @@ class UserContoller {
       body = { user_id: id };
     }
 
+    let header;
+    if (this.user !== null) {
+      header = {
+        "x-access-token": this.user.token,
+      };
+    }
+
     return this.apiClient
-      .post(APIURLs.myqueries, body, { "x-access-token": this.user.token })
+      .post(APIURLs.myqueries, body, header)
       .then((response) => {
         console.log(response);
         return response.data;
@@ -183,9 +197,21 @@ class UserContoller {
       });
   }
 
-  async getMyCases() {
+  async getMyCases(id) {
+    let body;
+    if (id !== null) {
+      body = {
+        user_id: id,
+      };
+    }
+
+    let header;
+    if (this.user !== null) {
+      header = { "x-access-token": this.user.token };
+    }
+
     return this.apiClient
-      .get(APIURLs.getMyCases, { "x-access-token": this.user.token })
+      .post(APIURLs.getMyCases, body, header)
       .then((response) => {
         console.log(response);
         return response.data;
@@ -214,6 +240,21 @@ class UserContoller {
   async getRequestConsultation() {
     return this.apiClient
       .get(APIURLs.getRequestConsultation, {
+        "x-access-token": this.user.token,
+      })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async requestPromotions() {
+    return this.apiClient
+      .get(APIURLs.requestPromosion, {
         "x-access-token": this.user.token,
       })
       .then((response) => {

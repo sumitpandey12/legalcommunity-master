@@ -1,104 +1,60 @@
-import React from "react";
+import React, { useEffect } from "react";
 import NewInput from "../../Utils/NewInput";
 import Avatar from "../../Utils/Avatars";
-
-const chatHistory = [
-  {
-    role: "user",
-    message: "Hey",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "My name is AI ChatBot",
-  },
-  {
-    role: "user",
-    message: "Hey",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "My name is AI ChatBot",
-  },
-  {
-    role: "user",
-    message: "Hey",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "My name is AI ChatBot",
-  },
-  {
-    role: "user",
-    message: "Hey",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "My name is AI ChatBot",
-  },
-  {
-    role: "user",
-    message: "Hey",
-  },
-  {
-    role: "bot",
-    message: "Hi, How Are You ?",
-  },
-  {
-    role: "user",
-    message: "I am fine, What is your name ?",
-  },
-  {
-    role: "bot",
-    message: "My name is AI ChatBot",
-  },
-];
+import Utils from "../../Utils/Utils";
+import ChatController from "../../APIs/ChatController";
+import AuthContext from "../../Context/AuthContext";
+import Button from "../../Utils/Button";
+import { PopupContext } from "../../Context/PopupContext";
 
 const ChatBot = () => {
+  const [chats, setChats] = React.useState([]);
+  const chatController = new ChatController();
+  const authContext = React.useContext(AuthContext);
+  const popupContext = React.useContext(PopupContext);
+
+  const createChat = async () => {
+    console.log("create chat");
+    const chat = await chatController.createChat();
+    console.log(chat);
+    setChats([...chats, chat]);
+  };
+
   return (
-    <div className="relative w-full h-full">
-      <div className="p-4 overflow-y-auto">
-        {chatHistory.map((chat, index) => (
-          <Chat
-            key={index}
-            user={chat.role === "user"}
-            message={chat.message}
-          />
-        ))}
+    <div className="relative w-full h-full flex flex-col">
+      <div className="h-full p-4 overflow-y-auto">
+        {authContext.isLogined ? (
+          chats.map((chat, index) => (
+            <Chat
+              key={index}
+              user={chat.role === "user"}
+              message={chat.message}
+            />
+          ))
+        ) : (
+          <div className="w-full h-full flex flex-col justify-center items-center gap-2">
+            <div className="text-white text-lg font-semibold">
+              Welcome, to the AI Expert. Login to get reponses.
+            </div>
+            <Button
+              title="Login"
+              onClick={() => {
+                popupContext.toggleLogin(true);
+              }}
+            />
+          </div>
+        )}
       </div>
-      <div className="w-full sticky bottom-0 bg-white z-20 flex justify-center absolute inset-x-0 bottom-5">
-        <NewInput placeholder="Type here..." className="w-2/3 my-3" />
+      <div
+        style={{ backgroundColor: Utils.color.primary }}
+        className="w-full fixed bottom-0 left-32 inset-x-0 flex justify-center"
+      >
+        <NewInput
+          onSend={() => createChat()}
+          placeholder="Type here..."
+          className="w-2/3 my-3"
+          disabled={!authContext.isLogined}
+        />
       </div>
     </div>
   );
@@ -119,6 +75,7 @@ const Chat = ({ user, message }) => {
       />
 
       <p
+        style={{ backgroundColor: Utils.color.secondary }}
         className={`${
           user
             ? "bg-amber-950 text-white rounded-bl-xl"

@@ -21,30 +21,17 @@ import { Avatar, Tooltip } from "@mui/material";
 import UserContoller from "../../../APIs/UserController";
 import AuthContext from "../../../Context/AuthContext";
 import { PopupContext } from "../../../Context/PopupContext";
-
-const item = {
-  id: 1,
-  full_name: "Sumit Pandey",
-  user_profile:
-    "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  date: Date.now(),
-  like_count: 120,
-  comment_count: 120,
-  description:
-    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into",
-  image_url:
-    "https://images.unsplash.com/photo-1720719542373-9e9067e6be20?q=80&w=1467&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-};
+import Spinner from "../../../Utils/Spinner";
 
 const Post = () => {
   const feedContext = useContext(FeedContext);
 
   const [isUpVote, setUpVote] = React.useState(null);
-
   const params = useParams();
   const [comments, setComments] = useState([]);
-
   const [post, setPost] = useState(null);
+
+  const [isLoading, setLoading] = React.useState(false);
 
   const publicController = new PublicController();
   const userController = new UserContoller();
@@ -61,7 +48,7 @@ const Post = () => {
   }, []);
 
   const getPost = async () => {
-    const response = feedContext.getPost(params.id);
+    const response = await publicController.getPost(params.id);
     console.log("postsssss", response);
     setPost(response);
   };
@@ -104,33 +91,48 @@ const Post = () => {
       popupContext.toggleLogin(true);
       return;
     }
+    if (isLoading) {
+      return;
+    }
+    setLoading(true);
+
     const response = await userController.followUnfollow({
       friend_id: post.author_id,
     });
+
+    setLoading(false);
     console.log(response);
   };
+
+  if (post === null) {
+    return <Spinner />;
+  }
 
   return (
     <div className=" flex flex-col items-start w-2/3">
       {post && (
-        <div className="p-4">
+        <div className="p-4 w-full">
           <div className="flex justify-between">
             <div className="flex items-center gap-2 mb-2">
               <Avatar image={post.profile} />
-              <span className="font-bold text-lg">{post.name}</span>
+              <span className="font-bold text-lg text-white">{post.name}</span>
             </div>
             <Button
+              isLoading={isLoading}
               onClick={followHandler}
-              title="Follow"
+              title={post.is_following ? "Following" : "Follow"}
               className="w-min h-min px-4 py-1"
             />
           </div>
-          <p className="text-lg my-4 text-start">{post.query_content}</p>
+          <p
+            dangerouslySetInnerHTML={{ __html: post.query_content }}
+            className="text-lg my-4 text-start text-white"
+          ></p>
           {post.file && (
             <img
               src={post.file}
               className="h-80 w-full rounded-xl object-cover"
-              style={{ objectFit: "fill" }}
+              style={{ objectFit: "cover" }}
             />
           )}
           <div className="mt-4">
@@ -159,7 +161,7 @@ const Post = () => {
                       UpVote
                     </span>
                   </div>
-                  <span>{post.vote_count}</span>
+                  <span className="text-white">{post.vote_count}</span>
                   <Tooltip title="DownVote" placement="top">
                     <div
                       onClick={() => {
@@ -186,7 +188,6 @@ const Post = () => {
 
       <CommentTextField
         className={"p-2 mb-2"}
-        user_profile={item.user_profile}
         onPost={(comment) => {
           if (!authContext.isLogined) {
             popupContext.toggleLogin(true);
@@ -199,6 +200,7 @@ const Post = () => {
 
       <div className="p-2 px-6">
         {comments &&
+          comments.map &&
           comments.map((item, index) => (
             <Comment
               key={index}

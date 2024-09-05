@@ -8,6 +8,7 @@ import { ChatContext } from "../../Context/ChatContext";
 import ChatController from "../../APIs/ChatController";
 import AuthContext from "../../Context/AuthContext";
 import Spinner from "../../Utils/Spinner";
+import Utils from "../../Utils/Utils";
 
 const ChatItem = ({ isMessage }) => {
   const [isAccepted, setIsAccepted] = React.useState(true);
@@ -66,13 +67,16 @@ const ChatItem = ({ isMessage }) => {
                 />
               ))
             ) : chatHistory !== null ? (
-              <div>No messages</div>
+              <div className="text-white">No messages</div>
             ) : (
               <Spinner />
             )}
           </div>
 
-          <div className="w-full bg-white fixed bottom-0 left-32 inset-x-0 flex justify-center">
+          <div
+            style={{ color: Utils.color.white }}
+            className="w-full fixed bottom-0 left-32 inset-x-0 flex justify-center"
+          >
             <NewInput
               onSend={sendMessage}
               placeholder="Type here..."
@@ -82,7 +86,9 @@ const ChatItem = ({ isMessage }) => {
         </>
       ) : (
         <div className="flex-1 flex justify-center items-center">
-          <p className="text-gray-500 text-lg">Request is pending...</p>
+          <p className="text-gray-500 text-lg text-white">
+            Request is pending...
+          </p>
         </div>
       )}
     </div>
@@ -91,19 +97,23 @@ const ChatItem = ({ isMessage }) => {
 
 const ChatListTile = ({ isMessage, name, profile, id }) => {
   return (
-    <div className="sticky top-0 bg-white z-20 flex gap-4 items-center w-full px-4 py-2 border-b border-gray-300">
+    <div
+      style={{ backgroundColor: Utils.color.primary }}
+      className="sticky top-0 bg-white z-20 flex gap-4 items-center w-full px-4 py-2 border-b border-gray-500"
+    >
       <IconButton
         aria-label="delete"
         onClick={() => {
           window.history.back();
         }}
+        style={{ color: Utils.color.white }}
       >
         <BiArrowBack />
       </IconButton>
       <Avatar sx={{ bgcolor: isMessage ? deepOrange[500] : blue[500] }}>
         {name && name[0].toUpperCase()}
       </Avatar>
-      <p className="text-md font-semibold">{name}</p>
+      <p className="text-md font-semibold text-white">{name}</p>
     </div>
   );
 };
@@ -123,6 +133,7 @@ const Chat = ({ user, message }) => {
       />
 
       <p
+        style={{ backgroundColor: Utils.color.secondary }}
         className={`${
           user
             ? "bg-amber-950 text-white rounded-bl-xl"

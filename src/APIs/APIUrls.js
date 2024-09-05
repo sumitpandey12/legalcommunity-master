@@ -9,6 +9,9 @@ export default class APIURLs {
   static categories = "/public/categories";
   static comment = "/public/comments";
   static getExperts = "/public/experts";
+  static getPost = "/public/post";
+  static getLibrary = "/public/library";
+  static search = "/public/search";
 
   //User routes
   static profile = "/user/profile";
@@ -31,6 +34,7 @@ export default class APIURLs {
   static getMyCases = "/lawyer/cases";
   static getRequestConsultation = "/lawyer/consultation-requests";
   static updateConsultation = "/lawyer/update-consultation";
+  static requestPromosion = "/lawyer/request-promotion";
 
   //chats
   static getChats = "/chat/chats";

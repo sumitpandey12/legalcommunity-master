@@ -1,19 +1,24 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import Button from "../../Utils/Button";
 import Divider from "../../Utils/Divider";
 import { Link } from "react-router-dom";
 import AuthContext from "../../Context/AuthContext";
+import Utils from "../../Utils/Utils";
 
 const SignupForm = (props) => {
   const nameRef = useRef("");
   const emailRef = useRef("");
   const passwordRef = useRef("");
   const confirmPasswordRef = useRef("");
+  const [isLoading, setLoading] = useState(false);
 
   const authContext = useContext(AuthContext);
 
-  const submitHandler = (e) => {
-    e.preventDefault();
+  const submitHandler = async (e) => {
+    if (isLoading) {
+      return;
+    }
+    setLoading(true);
     if (
       nameRef.current.value.length < 4 &&
       emailRef.current.value.length < 4 &&
@@ -27,7 +32,7 @@ const SignupForm = (props) => {
         return;
       }
 
-      const response = authContext.register({
+      const response = await authContext.register({
         name: nameRef.current.value,
         email: emailRef.current.value,
         password: passwordRef.current.value,
@@ -37,38 +42,55 @@ const SignupForm = (props) => {
         props.onClose();
       }
     }
+    setLoading(false);
   };
 
   return (
     <form className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Sign Up</h1>
+      <h1 className="text-2xl font-bold text-white">Sign Up</h1>
       <Divider className="my-1" />
-      <div className="w-full rounded-full border border-gray-300 px-4 py-2 w-1/2 flex items-center gap-2">
+      <div
+        style={{ backgroundColor: Utils.color.white }}
+        className="w-full rounded-full border border-gray-300 px-4 py-2 w-1/2 flex items-center gap-2"
+      >
         <input
           ref={nameRef}
           type="text"
-          className="border-0 outline-0 w-full"
+          style={{ backgroundColor: Utils.color.white }}
+          className="border-0 border-gray-500 outline-0 w-full"
           placeholder="Full Name"
         />
       </div>
-      <div className="w-full rounded-full border border-gray-300 px-4 py-2 w-1/2 flex items-center gap-2">
+      <div
+        style={{ backgroundColor: Utils.color.white }}
+        className="w-full rounded-full border border-gray-300 px-4 py-2 w-1/2 flex items-center gap-2"
+      >
         <input
           ref={emailRef}
+          style={{ backgroundColor: Utils.color.white }}
           type="email"
-          className="border-0 outline-0 w-full"
+          className="border-0 border-gray-500 outline-0 w-full"
           placeholder="Email"
         />
       </div>
-      <div className="w-full rounded-full border border-gray-300 px-4 py-2 w-1/2 flex items-center gap-2">
+      <div
+        style={{ backgroundColor: Utils.color.white }}
+        className="w-full rounded-full border border-gray-300 px-4 py-2 w-1/2 flex items-center gap-2"
+      >
         <input
+          style={{ backgroundColor: Utils.color.white }}
           ref={passwordRef}
           type="password"
-          className="border-0 outline-0 w-full"
+          className="border-0 border-gray-500 outline-0 w-full"
           placeholder="Password"
         />
       </div>
-      <div className="w-full rounded-full border border-gray-300 px-4 py-2 w-1/2 flex items-center gap-2">
+      <div
+        style={{ backgroundColor: Utils.color.white }}
+        className="w-full rounded-full border border-gray-300 px-4 py-2 w-1/2 flex items-center gap-2"
+      >
         <input
+          style={{ backgroundColor: Utils.color.white }}
           ref={confirmPasswordRef}
           type="password"
           className="border-0 outline-0 w-full"
@@ -77,7 +99,7 @@ const SignupForm = (props) => {
       </div>
 
       <div className="flex justify-center items-center">
-        <p className="text-sm">Already have an account ?</p>
+        <p className="text-sm text-white">Already have an account ?</p>
         <div
           onClick={props.onSignUp}
           className="ml-1 text-blue-500 cursor-pointer"
@@ -85,7 +107,7 @@ const SignupForm = (props) => {
           Sign In
         </div>
       </div>
-      <Button onClick={submitHandler} title="Sign Up" />
+      <Button isLoading={isLoading} onClick={submitHandler} title="Sign Up" />
     </form>
   );
 };

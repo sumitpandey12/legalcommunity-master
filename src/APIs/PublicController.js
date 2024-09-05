@@ -8,11 +8,18 @@ class PublicController {
   }
 
   async getPosts() {
-    console.log(APIURLs.posts);
+    let header;
+    if (this.user?.token) {
+      header = { "x-access-token": this.user?.token };
+    }
     return this.apiClient
-      .post(APIURLs.posts, {
-        search: "",
-      })
+      .post(
+        APIURLs.posts,
+        {
+          search: "",
+        },
+        header
+      )
       .then((response) => {
         console.log(response);
         return response.data;
@@ -57,6 +64,51 @@ class PublicController {
     return this.apiClient
       .post(APIURLs.comment, {
         query_id: post_id,
+      })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async getPost(post_id) {
+    return this.apiClient
+      .post(APIURLs.getPost, {
+        query_id: post_id,
+      })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async getMyLibrary(post_id) {
+    return this.apiClient
+      .post(APIURLs.getLibrary, {
+        library_id: post_id,
+      })
+      .then((response) => {
+        console.log(response);
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return error;
+      });
+  }
+
+  async getSearch(search) {
+    return this.apiClient
+      .post(APIURLs.search, {
+        search: search,
       })
       .then((response) => {
         console.log(response);

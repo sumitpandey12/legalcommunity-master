@@ -12,6 +12,7 @@ import { ChatContext } from "../../Context/ChatContext";
 import APIURLs from "../../APIs/APIUrls";
 import { socket } from "../../socket";
 import Spinner from "../../Utils/Spinner";
+import Utils from "../../Utils/Utils";
 
 const Chat = () => {
   const [selectedTab, setSelectedTab] = React.useState(0);
@@ -41,7 +42,7 @@ const Chat = () => {
     };
   }, []);
 
-  if (chatContext.messagesChat === null || chatContext.requestsChat === null) {
+  if (chatContext.messagesChat == null || chatContext.requestsChat == null) {
     return <Spinner />;
   }
 
@@ -55,34 +56,52 @@ const Chat = () => {
               <ChatListTile isMessage={true} key={index} {...item} />
             ))
           ) : (
-            <div>No Messages Found!</div>
+            <div className="text-white">No Messages Found!</div>
           )
         ) : chatContext.requestsChat.length > 0 ? (
           chatContext.requestsChat.map((item, index) => (
             <ChatListTile isMessage={false} key={index} {...item} />
           ))
         ) : (
-          <div>No Messages Found!</div>
+          <div className="text-white">No Messages Found!</div>
         )}
       </div>
     </div>
   );
 };
 
-const ChatListTile = ({ isMessage, name, prfile, id }) => {
+const ChatListTile = ({
+  isMessage,
+  name,
+  prfile,
+  id,
+  last_message,
+  last_message_time,
+}) => {
+  const newDate =
+    last_message_time !== null
+      ? new Date(last_message_time).toDateString()
+      : "";
+
   return (
     <Link
       to={`${isMessage ? "message" : "request"}/${id}`}
-      className="w-full px-4 py-2 border-b border-gray-300"
+      className="w-full px-4"
     >
-      <div className="flex gap-4 items-center">
-        <Avatar
-          src={prfile}
-          sx={{ bgcolor: isMessage ? deepOrange[500] : blue[500] }}
-        >
-          {name[0]?.toUpperCase()}
-        </Avatar>
-        <p className="text-md font-semibold">{name}</p>
+      <div className="flex justify-between items-center border-b border-gray-300 pb-4">
+        <div className="flex gap-4 items-center">
+          <Avatar
+            src={prfile}
+            sx={{ bgcolor: isMessage ? deepOrange[500] : blue[500] }}
+          >
+            {name && name[0]?.toUpperCase()}
+          </Avatar>
+          <div>
+            <p className="text-md font-semibold text-white">{name}</p>
+            <p className="text-sm text-white">{last_message}</p>
+          </div>
+        </div>
+        <p className="text-sm text-gray-300 mr-6">{newDate}</p>
       </div>
     </Link>
   );
@@ -100,10 +119,32 @@ const TabMenu = ({ selectedTab, setSelectedTab }) => {
         value={selectedTab}
         onChange={handleChange}
         aria-label="secondary tabs example"
-        indicatorColor="secondary"
+        TabIndicatorProps={{
+          sx: {
+            backgroundColor: Utils.color.secondary,
+          },
+        }}
       >
-        <Tab value={0} label="Query Request" />
-        <Tab value={1} label="Query Response" />
+        <Tab
+          sx={{
+            color: Utils.color.white,
+            "&.Mui-selected": {
+              color: Utils.color.secondary,
+            },
+          }}
+          value={0}
+          label="Query Request"
+        />
+        <Tab
+          sx={{
+            color: Utils.color.white,
+            "&.Mui-selected": {
+              color: Utils.color.secondary,
+            },
+          }}
+          value={1}
+          label="Query Response"
+        />
       </Tabs>
     </Box>
   );
